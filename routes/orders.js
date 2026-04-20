@@ -1,36 +1,38 @@
 const express = require("express");
 const router = express.Router();
 const Order = require("../models/Order");
-const Cart = require("../models/Cart");
+const { createShipment } = require("../utils/delhivery");
 
-// Place order
-router.post("/", async (req, res) => {
-  const { phone } = req.body;
+// 🔥 CREATE ORDER
+router.post("/create", async (req, res) => {
+  try {
+    const { phone, items, totalAmount, address } = req.body;
 
-  const cart = await Cart.findOne({ phone });
+    // 1️⃣ Save order first
+    let order = new Order({
+      phone,
+      items,
+      totalAmount,
+      address,
+    });
 
-  if (!cart || cart.items.length === 0) {
-    return res.status(400).json({ message: "Cart empty" });
+    await order.save();
+
+    // 2️⃣ Create shipment in Delhivery
+    const awb = await createShipment(order);
+
+    // 3️⃣ Save tracking ID
+    if (awb) {
+      order.tracking_id = awb;
+      order.status = "confirmed";
+      await order.save();
+    }
+
+    res.json(order);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Order failed" });
   }
-
-  const order = await Order.create({
-    phone,
-    items: cart.items,
-  });
-
-  // Clear cart
-  cart.items = [];
-  await cart.save();
-
-  res.json(order);
-});
-
-// Get orders by phone
-router.get("/:phone", async (req, res) => {
-  const orders = await Order.find({ phone: req.params.phone })
-    .populate("items.productId");
-
-  res.json(orders);
 });
 
 module.exports = router;

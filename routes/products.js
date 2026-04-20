@@ -1,16 +1,32 @@
 const express = require("express");
 const router = express.Router();
+const Product = require("../models/Product");
 
-const {
-  getProducts,
-  getProductDetails,
-  createProduct
-} = require("../controllers/productController");
+// 🔥 GET ALL PRODUCTS
+router.get("/", async (req, res) => {
+  const products = await Product.find();
+  res.json(products);
+});
 
-router.get("/", getProducts);
+// 🔥 GET SINGLE PRODUCT
+router.get("/:id", async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  res.json(product);
+});
 
-router.get("/:id", getProductDetails);
+// 🔥 UPDATE PRODUCT
+router.put("/:id", async (req, res) => {
+  try {
+    const updated = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
 
-router.post("/admin/create", createProduct);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: "Update failed" });
+  }
+});
 
 module.exports = router;
