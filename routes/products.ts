@@ -39,7 +39,19 @@ router.get("/:id", async (req: Request, res: Response) => {
     });
   }
 });
+router.delete("/:id", async (req: Request, res: Response) => {
+  try {
+    await Product.findByIdAndDelete(req.params.id);
 
+    res.json({
+      message: "Product deleted",
+    });
+  } catch {
+    res.status(500).json({
+      message: "Delete failed",
+    });
+  }
+});
 router.put("/:id", async (req: Request, res: Response) => {
   try {
     const updated = await Product.findByIdAndUpdate(
