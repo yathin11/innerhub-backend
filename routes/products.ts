@@ -3,6 +3,23 @@ import Product from "../models/Product";
 
 const router = express.Router();
 
+router.get("/", async (_req: Request, res: Response) => {
+  try {
+    console.log("Product Model:", Product);
+
+    const products = await Product.find();
+
+    res.json(products);
+  } catch (error: any) {
+    console.error("PRODUCT ERROR:", error);
+
+    res.status(500).json({
+      message: "Error fetching products",
+      error: String(error),
+      stack: error?.stack,
+    });
+  }
+});
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const product = await Product.findById(req.params.id);
