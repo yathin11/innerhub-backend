@@ -1,11 +1,16 @@
 {
+ 
   "name": "my-shop-backend",
   "version": "1.0.0",
   "main": "server.ts",
-"scripts": {
-  "dev": "nodemon --exec ts-node server.ts",
-  "start": "ts-node server.ts"
-},
+ 
+
+  "scripts": {
+    "dev": "nodemon --exec ts-node server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  }
+,
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
