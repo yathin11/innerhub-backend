@@ -1,9 +1,9 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
 
-const Product = require("../models/Product");
-const Order = require("../models/Order");
-const User = require("../models/User");
+import Product from "../models/Product";
+import Order from "../models/Order";
+import User from "../models/User";
 
 // ================= PRODUCTS =================
 
@@ -60,4 +60,4 @@ router.get("/users", async (req, res) => {
   res.json(users);
 });
 
-module.exports = router;
+export default router;

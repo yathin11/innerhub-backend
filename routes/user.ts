@@ -1,9 +1,9 @@
-const express = require("express");
-const router = express.Router();
-const User = require("../models/User");
+import express, { Request, Response } from "express";
+import User from "../models/User";
 
-// Save phone
-router.post("/", async (req, res) => {
+const router = express.Router();
+
+router.post("/", async (req: Request, res: Response) => {
   const { phone } = req.body;
 
   let user = await User.findOne({ phone });
@@ -15,4 +15,4 @@ router.post("/", async (req, res) => {
   res.json(user);
 });
 
-module.exports = router;
+export default router;

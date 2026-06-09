@@ -1,7 +1,8 @@
-const express = require("express");
+import express from "express";
+
 const router = express.Router();
-const Order = require("../models/Order");
-const { createShipment } = require("../utils/delhivery");
+import Order from "../models/Order";
+import { createShipment } from "../utils/delhivery";
 
 // 🔥 CREATE ORDER
 router.post("/create", async (req, res) => {
@@ -35,4 +36,4 @@ router.post("/create", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

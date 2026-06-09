@@ -1,50 +1,64 @@
-const express = require("express");
-const router = express.Router();
-const Cart = require("../models/Cart");
+import express, { Request, Response } from "express";
+import Cart from "../models/Cart";
 
-// Get cart
-router.get("/:phone", async (req, res) => {
-  const cart = await Cart.findOne({ phone: req.params.phone }).populate("items.productId");
+const router = express.Router();
+
+router.get("/:phone", async (req: Request, res: Response) => {
+  const cart = await Cart.findOne({
+    phone: req.params.phone,
+  }).populate("items.productId");
+
   res.json(cart || { items: [] });
 });
 
-// Add to cart
-router.post("/add", async (req, res) => {
+router.post("/add", async (req: Request, res: Response) => {
   const { phone, productId, quantity } = req.body;
 
   let cart = await Cart.findOne({ phone });
 
   if (!cart) {
-    cart = new Cart({ phone, items: [] });
+    cart = new Cart({
+      phone,
+      items: [],
+    });
   }
 
   const itemIndex = cart.items.findIndex(
-    (item) => item.productId.toString() === productId
+    (item: any) => item.productId.toString() === productId
   );
 
   if (itemIndex > -1) {
     cart.items[itemIndex].quantity += quantity;
   } else {
-    cart.items.push({ productId, quantity });
+    cart.items.push({
+      productId,
+      quantity,
+    } as any);
   }
 
   await cart.save();
+
   res.json(cart);
 });
 
-// Remove item
-router.delete("/remove", async (req, res) => {
+router.delete("/remove", async (req: Request, res: Response) => {
   const { phone, productId } = req.body;
 
   const cart = await Cart.findOne({ phone });
 
+  if (!cart) {
+    return res.status(404).json({
+      message: "Cart not found",
+    });
+  }
+
   cart.items = cart.items.filter(
-    (item) => item.productId.toString() !== productId
-  );
+    (item: any) => item.productId.toString() !== productId
+  ) as any;
 
   await cart.save();
 
   res.json(cart);
 });
 
-module.exports = router;
+export default router;

@@ -1,103 +1,97 @@
-const db = require("../config/db");
+import { Request, Response } from "express";
+import Product from "../models/Product";
 
-exports.getProducts = async (req, res) => {
-
+export const getProducts = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
-
-    const [products] = await db.query(
-      "SELECT * FROM products ORDER BY id DESC"
-    );
+    const products = await Product.find().sort({ _id: -1 });
 
     res.json(products);
-
-  } catch (error) {
-
+  } catch (error: any) {
     res.status(500).json({
       message: "Error fetching products",
-      error: error.message
+      error: error.message,
     });
-
   }
-
 };
 
-
-exports.getProductDetails = async (req, res) => {
-
+export const getProductById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
+    const product = await Product.findById(req.params.id);
 
-    const productId = req.params.id;
-
-    const [product] = await db.query(
-      "SELECT * FROM products WHERE id=?",
-      [productId]
-    );
-
-    const [variants] = await db.query(
-      "SELECT * FROM product_variants WHERE product_id=?",
-      [productId]
-    );
-
-    res.json({
-      product: product[0],
-      variants: variants
-    });
-
-  } catch (error) {
-
-    res.status(500).json({
-      message: "Error loading product",
-      error: error.message
-    });
-
-  }
-
-};
-
-
-exports.createProduct = async (req, res) => {
-
-  try {
-
-    const { name, description, price, image, variants } = req.body;
-
-    const [result] = await db.query(
-      `INSERT INTO products (name, description, base_price, image)
-       VALUES (?, ?, ?, ?)`,
-      [name, description, price, image]
-    );
-
-    const productId = result.insertId;
-
-    for (const variant of variants) {
-
-      await db.query(
-        `INSERT INTO product_variants
-        (product_id, color, size, price, stock)
-        VALUES (?, ?, ?, ?, ?)`,
-        [
-          productId,
-          variant.color,
-          variant.size,
-          variant.price,
-          variant.stock
-        ]
-      );
-
+    if (!product) {
+      res.status(404).json({
+        message: "Product not found",
+      });
+      return;
     }
+
+    res.json(product);
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Error fetching product",
+      error: error.message,
+    });
+  }
+};
+
+export const createProduct = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const product = await Product.create(req.body);
+
+    res.status(201).json(product);
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Error creating product",
+      error: error.message,
+    });
+  }
+};
+
+export const updateProduct = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+    res.json(product);
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Error updating product",
+      error: error.message,
+    });
+  }
+};
+
+export const deleteProduct = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    await Product.findByIdAndDelete(req.params.id);
 
     res.json({
       success: true,
-      message: "Product created successfully"
     });
+  } catch (error: any) {
+  console.error("PRODUCT ERROR:", error);
 
-  } catch (error) {
-
-    res.status(500).json({
-      message: "Product creation failed",
-      error: error.message
-    });
-
-  }
-
+  res.status(500).json({
+    message: "Error fetching products",
+    error: String(error),
+  });
+}
 };
