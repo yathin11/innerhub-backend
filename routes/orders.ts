@@ -3,7 +3,20 @@ import express from "express";
 const router = express.Router();
 import Order from "../models/Order";
 import { createShipment } from "../utils/delhivery";
+router.get("/:phone", async (req, res) => {
+  try {
+    const orders = await Order.find({
+      phone: req.params.phone,
+    }).sort({ createdAt: -1 });
 
+    res.json(orders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Failed to fetch orders",
+    });
+  }
+});
 // 🔥 CREATE ORDER
 router.post("/create", async (req, res) => {
   try {
